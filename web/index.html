@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>本機虛擬試穿</title>
+  <!-- local-only: blocks MediaPipe usage telemetry; allows the CDN fallback for models -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval' 'unsafe-eval'; connect-src 'self' https://cdn.jsdelivr.net https://storage.googleapis.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; media-src 'self' blob: mediastream:">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">本機虛擬試穿 <span class="sub">Local Try-On</span></div>
+    <div class="pills">
+      <span class="pill" id="pillCam"><i></i>鏡頭</span>
+      <span class="pill" id="pillTrack"><i></i>追蹤 <b id="fps">–</b></span>
+      <span class="pill" id="pillHD"><i></i>HD 引擎 <b id="hdState">–</b></span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage" id="stage">
+      <div class="viewport" id="viewport">
+        <canvas id="view"></canvas>
+        <canvas id="overlay"></canvas>
+        <div class="hint" id="hint">正在啟動鏡頭…</div>
+        <div class="countdown" id="countdown"></div>
+        <div class="flash" id="flash"></div>
+      </div>
+      <div class="stagebar">
+        <button class="btn ghost" id="btnMirror" title="鏡像 (M)">鏡像</button>
+        <button class="btn ghost" id="btnReadable" title="鏡像時讓衣服上的文字維持正向">文字正向</button>
+        <button class="btn ghost" id="btnCompare" title="按住空白鍵也可比較">按住比較原圖</button>
+        <button class="btn ghost" id="btnDebug" title="顯示骨架 (D)">骨架</button>
+        <button class="btn ghost" id="btnSnap" title="儲存目前畫面">截圖</button>
+        <span class="spacer"></span>
+        <span class="perf" id="perf"></span>
+      </div>
+      <video id="video" playsinline muted></video>
+    </section>
+
+    <aside class="panel">
+      <div class="card">
+        <h2>加入衣服</h2>
+        <div class="seg-ctl" id="catCtl">
+          <button data-cat="upper" class="on">上衣／外套</button>
+          <button data-cat="dress">洋裝／連身</button>
+          <button data-cat="lower">褲子／裙子</button>
+        </div>
+        <label class="drop" id="drop">
+          <input type="file" id="file" accept="image/*" hidden>
+          <strong>把衣服圖片拖進來</strong>
+          <span>從購物網站直接拖曳圖片、⌘V 貼上「複製圖片」，或點這裡選檔案</span>
+        </label>
+        <form class="urlrow" id="urlForm">
+          <input type="url" id="urlInput" placeholder="貼上商品頁或圖片網址" autocomplete="off">
+          <button class="btn" type="submit">抓取</button>
+        </form>
+        <div class="candidates" id="candidates" hidden>
+          <div class="cand-head"><span id="candTitle">選一張商品圖</span><button class="link" id="candClose">關閉</button></div>
+          <div class="grid" id="candGrid"></div>
+        </div>
+        <div class="busy" id="addBusy" hidden><span class="spin"></span><span id="addBusyText">處理中…</span></div>
+      </div>
+
+      <div class="card">
+        <h2>我的衣櫃 <span class="count" id="wardCount"></span></h2>
+        <div class="grid wardrobe" id="wardrobe"><p class="empty">還沒有衣服，先加入一件吧</p></div>
+      </div>
+
+      <div class="card">
+        <h2>合身與光影</h2>
+        <div class="sliders">
+          <label>尺寸<input type="range" id="sSize" min="0.8" max="1.35" step="0.01" value="1"><output></output></label>
+          <label>上下位置<input type="range" id="sOffset" min="-0.25" max="0.25" step="0.01" value="0"><output></output></label>
+          <label>衣長<input type="range" id="sLength" min="0.75" max="1.35" step="0.01" value="1"><output></output></label>
+          <label>皺褶光影<input type="range" id="sShade" min="0" max="1" step="0.01" value="0.75"><output></output></label>
+          <label>立體受光<input type="range" id="sIllum" min="0" max="1" step="0.01" value="0.55"><output></output></label>
+          <label>亮度<input type="range" id="sBright" min="0.6" max="1.4" step="0.01" value="1"><output></output></label>
+          <label>色溫匹配<input type="range" id="sWB" min="0" max="1" step="0.01" value="0.6"><output></output></label>
+          <label>接觸陰影<input type="range" id="sAO" min="0" max="0.8" step="0.01" value="0.35"><output></output></label>
+        </div>
+        <button class="link" id="resetSliders">重設</button>
+      </div>
+
+      <details class="card" id="anchorCard">
+        <summary><h2>錨點校正</h2><span class="muted">衣服位置不準時用</span></summary>
+        <p class="muted small">拖曳圓點對齊：<b>肩</b> = 肩膀關節位置（略在肩線內側），<b>袖</b> = 袖口。下身則是左右髖關節。</p>
+        <canvas id="anchorCanvas" width="300" height="340"></canvas>
+        <div class="row"><button class="btn ghost" id="anchorReset">恢復自動</button><span class="muted small" id="anchorMode"></span></div>
+      </details>
+
+      <div class="card hd">
+        <h2>HD 逼真生成 <span class="muted">CatVTON · 本機</span></h2>
+        <div class="row">
+          <select id="hdPreset">
+            <option value="fast">快速（384×512，20 步）</option>
+            <option value="standard">標準（576×768，30 步）</option>
+            <option value="high">高品質（768×1024，50 步）</option>
+          </select>
+          <label class="check"><input type="checkbox" id="hdCountdown" checked>3 秒倒數</label>
+        </div>
+        <label class="check"><input type="checkbox" id="hdLive" checked>生成後用 HD 結果強化即時預覽</label>
+        <button class="btn primary big" id="btnHD">拍照並生成 HD 試穿（H）</button>
+        <div class="progress" id="hdProg" hidden><div class="bar"><i id="hdBar"></i></div><span id="hdMsg"></span></div>
+        <div class="row"><button class="link" id="btnPreload">預先載入模型</button><span class="muted small" id="hdInfo"></span></div>
+        <div class="grid results" id="results"></div>
+      </div>
+      <p class="foot muted small">所有運算都在這台電腦上執行。CatVTON 權重僅限非商業使用（CC BY-NC-SA 4.0）。</p>
+    </aside>
+  </main>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modal-body">
+      <img id="modalImg" alt="HD 試穿結果">
+      <div class="modal-actions">
+        <a class="btn" id="modalDownload" download>下載</a>
+        <button class="btn ghost" id="modalCompare">對照原圖</button>
+        <button class="btn ghost" id="modalClose">關閉</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

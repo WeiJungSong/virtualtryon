@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title>衣服分析除錯</title>
+  <style>
+    body { background: #111; color: #ddd; font: 13px sans-serif; margin: 16px; }
+    .row { display: flex; gap: 12px; margin-bottom: 18px; align-items: flex-start; flex-wrap: wrap; }
+    canvas { background: #2a2a2a; border-radius: 6px; }
+    .lbl { width: 100%; color: #aaa; }
+  </style>
+</head>
+<body>
+  <p>開發用：顯示每件衣服的自動錨點分析（綠＝軀幹區、橘＝肩關節、藍＝袖子中心線、紅＝骨架），以及套到合成骨架上的變形結果。</p>
+  <div id="out"></div>
+  <script type="module" src="js/debug.js"></script>
+</body>
+</html>

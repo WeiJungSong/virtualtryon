@@ -1,0 +1,26 @@
+.venv/
+__pycache__/
+data/
+web/vendor/
+*.part
+.venv.old-*/
+.tools/
+
+# never commit personal photos, generated results, media or model weights
+.DS_Store
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.heic
+*.mp4
+*.mov
+*.y4m
+*.onnx
+*.task
+*.tflite
+*.safetensors
+*.pt
+*.ckpt
+*.zip

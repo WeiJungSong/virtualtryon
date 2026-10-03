@@ -1,7 +1,18 @@
 # 本機虛擬試穿（Local Try-On）
 
-在自己的 Mac 上用鏡頭即時試穿網購衣服的本機版本，架構參考 AnyWear。
-**即時 AR 預覽**和 **HD 逼真生成** 全部在這台電腦上運算，衣服圖片、鏡頭畫面都不會上傳到任何雲端。
+用鏡頭即時試穿網購衣服的本機版本，架構參考 AnyWear。**即時 AR 預覽**和 **HD 逼真生成**都在這台電腦上運算，衣服圖片與鏡頭畫面不會上傳到任何雲端。
+
+## 快速開始
+
+| 系統 | 安裝 | 啟動 |
+|---|---|---|
+| macOS | `bash setup.sh`（或雙擊 `setup.command`） | `bash run.sh`（或雙擊 `run.command`） |
+| Windows | 雙擊 `setup.bat` | 雙擊 `run.bat` |
+| Linux | `bash setup.sh` | `bash run.sh` |
+
+- 不需要事先安裝 Python；安裝程式會把所有東西下載到這個資料夾內，最後顯示「自我檢測：全部通過」即完成
+- 啟動後以 Chrome 開啟 http://127.0.0.1:8765，允許鏡頭權限
+- 換電腦：複製整個資料夾，在新電腦重新執行安裝即可（見第 3 節）
 
 ---
 
@@ -54,7 +65,7 @@ Lucy VTON 是閉源模型，沒有釋出權重；開源的即時影片試穿模�
 ### macOS
 打開「終端機」，執行：
 ```bash
-cd ~/workstation/VC/virtual-tryon     # 換成你放這個資料夾的位置
+cd /path/to/virtual-tryon             # 換成你放這個資料夾的位置
 bash setup.sh                         # 安裝（最後會跑自我檢測）
 bash run.sh                           # 啟動，會用 Chrome 開 http://127.0.0.1:8765
 ```
@@ -198,10 +209,11 @@ virtual-tryon/
 - **特殊顯卡（例如 AMD ROCm）**：安裝前設定 `VTON_TORCH_INDEX`（PyTorch 套件庫網址）與 `VTON_TORCH_SPEC`（例如 `torch==2.6.0`）
 - **Hugging Face 下載慢**：設定 `HF_ENDPOINT` 使用鏡像站
 
-## 8. 授權
+## 8. 版本與授權
+
+目前版本見 `VERSION`。
 
 - CatVTON 權重：CC BY-NC-SA 4.0（**僅限非商業用途**）
 - Stable Diffusion inpainting：CreativeML OpenRAIL-M
 - MediaPipe：Apache 2.0；rembg：MIT
 - 網頁設定了 CSP，擋掉 MediaPipe 內建的使用量回報（odml.pa.googleapis.com）
-# virtualtryon

@@ -1,0 +1,19 @@
+# PyTorch is installed first by tools/install.py with the right build for this
+# machine (Apple Silicon / Intel Mac / NVIDIA CUDA / CPU), then these:
+
+# web server
+fastapi>=0.110
+uvicorn>=0.29
+python-multipart>=0.0.9
+httpx>=0.27
+beautifulsoup4>=4.12
+# images
+pillow>=10.0
+numpy>=1.26
+opencv-python-headless>=4.9
+onnxruntime>=1.16   # runs the ISNet background-removal model
+# HD try-on (CatVTON)
+diffusers>=0.30
+accelerate>=0.30
+huggingface_hub>=0.23
+safetensors>=0.4

@@ -1,0 +1,32 @@
+本機虛擬試穿（Local Try-On）快速開始
+=====================================
+
+不需要先安裝 Python：安裝程式會把需要的東西都下載到這個資料夾裡。
+第一次安裝需要網路。
+
+【macOS】
+  打開「終端機」，輸入（把路徑換成這個資料夾的位置）：
+      cd ~/Downloads/virtual-tryon
+      bash setup.sh        ← 安裝，最後顯示「自我檢測：全部通過」就完成了
+      bash run.sh          ← 啟動，會自動用 Chrome 打開試穿網頁
+  也可以雙擊 setup.command / run.command。
+  如果 macOS 說「無法打開」，在檔案上按右鍵 →「打開」，或改用上面的終端機指令。
+
+【Windows】
+  雙擊 setup.bat 安裝，之後雙擊 run.bat 啟動。
+
+【Linux】
+  bash setup.sh，之後 bash run.sh。
+
+【HD 逼真生成】
+  第一次按 HD 會下載約 2.3 GB 模型。
+  想在安裝時就下載並測速：bash setup.sh --hd（Windows：setup.bat --hd）
+
+【搬到別台電腦】
+  複製整個資料夾（或這個 zip）過去，重新跑一次安裝即可。
+  想帶走衣櫃與 HD 結果：一起複製 data 資料夾。
+
+【移除】
+  刪掉整個資料夾。
+
+詳細說明請看 README.md。
